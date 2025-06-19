@@ -1,35 +1,67 @@
 <?php
-require_once __DIR__ . '/mysqli_connect.php';
+    require_once __DIR__ . '/mysqli_connect.php'; // Este ficheiro deve definir $pdo com PDO
 
-$db_error = '';
-$motas = [];
+    $motas = [];
+    if ($pdo !== null) {
+        try {
+            $sql = "SELECT id, marca, modelo, cilindrada, preco, ano, tipo FROM motas";
+            $stmt = $pdo->query($sql);
+            $motas = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        } catch (PDOException $e) {
+            $db_error = $e->getMessage();
+        }
+    }
 
-// Verificar ligação
-if ($mysqli->connect_error) {
-    $db_error = "Erro de ligação: " . $mysqli->connect_error;
-} else {
-    // Adicionar Mota
-    if (isset($_POST['adicionar'])) {
+    // ADICIONAR
+    if (isset($_POST['adicionar']) && $pdo !== null) {
         $marca = $_POST['marca'];
         $modelo = $_POST['modelo'];
         $cilindrada = $_POST['cilindrada'];
         $preco = $_POST['preco'];
-        $ano = $_POST['ano'];
+        $armaanozenamento = $_POST['ano'];
         $tipo = $_POST['tipo'];
 
-        $stmt = $mysqli->prepare("INSERT INTO motas (marca, modelo, cilindrada, preco, ano, tipo) VALUES (?, ?, ?, ?, ?, ?)");
-        $stmt->bind_param('sssdis', $marca, $modelo, $cilindrada, $preco, $ano, $tipo);
-
-        if (!$stmt->execute()) {
-            $db_error = "Erro ao adicionar mota: " . $stmt->error;
+        try {
+            $sql = "INSERT INTO motas (marca, modelo, cilindrada, preco, ano, tipo) 
+                    VALUES (:marca, :modelo,:cilindrada :preco, :ano, :tipo)";
+            $stmt = $pdo->prepare($sql);
+            $stmt->execute([
+                ':marca' => $marca,
+                ':modelo' => $modelo,
+                ':cilindrada' => $cilindrada,
+                ':preco' => $preco,
+                ':ano' => $ano,
+                ':tipo' => $tipo
+            ]);
+            header("Location: index.php");
+            exit;
+        } catch (PDOException $e) {
+            echo "Erro ao adicionar: " . $e->getMessage();
         }
-        $stmt->close();
-        header("Location: index.php");
-        exit();
+    }
+    elseif (isset($_POST['adicionar'])) {
+        $db_error = $db_error ?: 'Ligação à base de dados indisponível';
     }
 
-    // Editar Mota
-    if (isset($_POST['guardar_editar'])) {
+    // APAGAR
+    if (isset($_POST['apagar']) && $pdo !== null) {
+        $id = $_POST['id'];
+        try {
+            $sql = "DELETE FROM motas WHERE id = :id";
+            $stmt = $pdo->prepare($sql);
+            $stmt->execute([':id' => $id]);
+            header("Location: index.php");
+            exit;
+        } catch (PDOException $e) {
+            echo "Erro ao apagar: " . $e->getMessage();
+        }
+    }
+    elseif (isset($_POST['apagar'])) {
+        $db_error = $db_error ?: 'Ligação à base de dados indisponível';
+    }
+
+    // EDITAR
+    if (isset($_POST['guardar_editar']) && $pdo !== null) {
         $id = $_POST['id'];
         $marca = $_POST['marca'];
         $modelo = $_POST['modelo'];
@@ -38,43 +70,32 @@ if ($mysqli->connect_error) {
         $ano = $_POST['ano'];
         $tipo = $_POST['tipo'];
 
-        $stmt = $mysqli->prepare("UPDATE motas SET marca=?, modelo=?, cilindrada=?, preco=?, ano=?, tipo=? WHERE id=?");
-        $stmt->bind_param('sssdssi', $marca, $modelo, $cilindrada, $preco, $ano, $tipo, $id);
-
-        if (!$stmt->execute()) {
-            $db_error = "Erro ao editar mota: " . $stmt->error;
+        try {
+            $sql = "UPDATE motas SET 
+                        marca = :marca,
+                        modelo = :modelo,
+                        cilindrada = :cilindrada,
+                        preco = :preco,
+                        ano = :ano,
+                        tipo = :tipo
+                    WHERE id = :id";
+            $stmt = $pdo->prepare($sql);
+            $stmt->execute([
+                ':marca' => $marca,
+                ':modelo' => $modelo,
+                ':cilindrada' => $cilindrada,
+                ':preco' => $preco,
+                ':ano' => $ano,
+                ':tipo' => $tipo,
+                ':id' => $id
+            ]);
+            header("Location: index.php");
+            exit;
+        } catch (PDOException $e) {
+            echo "Erro ao editar: " . $e->getMessage();
         }
-        $stmt->close();
-        header("Location: index.php");
-        exit();
     }
-
-    // Apagar Mota
-    if (isset($_POST['apagar'])) {
-        $id = $_POST['id'];
-
-        $stmt = $mysqli->prepare("DELETE FROM motas WHERE id=?");
-        $stmt->bind_param('i', $id);
-
-        if (!$stmt->execute()) {
-            $db_error = "Erro ao apagar mota: " . $stmt->error;
-        }
-        $stmt->close();
-        header("Location: index.php");
-        exit();
+    elseif (isset($_POST['guardar_editar'])) {
+        $db_error = $db_error ?: 'Ligação à base de dados indisponível';
     }
-
-    // Listar Motas
-    $result = $mysqli->query("SELECT * FROM motas ORDER BY id ASC");
-    if ($result) {
-        while ($row = $result->fetch_assoc()) {
-            $motas[] = $row;
-        }
-        $result->free();
-    } else {
-        $db_error = "Erro ao obter motas: " . $mysqli->error;
-    }
-}
-
-$mysqli->close();
 ?>
