@@ -80,7 +80,7 @@ $error_message = $db_error;
                 </form>
                 <form method="post" style="display:inline;">
                     <input type="hidden" name="id" value="<?= $mota['id'] ?>">
-                    <button type="submit" name="editar" class="btn btn-edit">Editar</button>
+                    <button type="submit" name="guardar_editar" class="btn btn-edit">Editar</button>
                 </form>
             </td>
         </tr>
