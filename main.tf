@@ -262,5 +262,3 @@ output "mysql_private_ip" {
   value       = azurerm_network_interface.nic_mysql.private_ip_address
   description = "IP privado da VM MySQL"
 }
-
-#commit test
