@@ -12,6 +12,19 @@ if ($pdo !== null) {
     }
 }
 
+function listar_motas(): array {
+    global $pdo;
+    if ($pdo === null) return [];
+
+    try {
+        $sql = "SELECT id, marca, modelo, cilindrada, preco, ano, tipo FROM motas ORDER BY id";
+        $stmt = $pdo->query($sql);
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    } catch (PDOException $e) {
+        return [];
+    }
+}
+
 // ADICIONAR
 if (isset($_POST['adicionar']) && $pdo !== null) {
     $marca = $_POST['marca'];
@@ -57,6 +70,7 @@ if (isset($_POST['apagar']) && $pdo !== null) {
 } elseif (isset($_POST['apagar'])) {
     $db_error = $db_error ?: 'Ligação à base de dados indisponível';
 }
+
 
 // EDITAR
 if (isset($_POST['guardar_editar']) && $pdo !== null) {
