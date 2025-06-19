@@ -20,6 +20,7 @@ provider "azurerm" {
 variable "subscription_id" {
   type        = string
   description = "Azure subscription ID"
+  default     = "cc10541e-dd0c-40f3-93d5-f99fc1d5de52"
 }
 
 variable "location" {
