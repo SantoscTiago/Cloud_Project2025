@@ -1,77 +1,80 @@
 <?php
-require 'mysqli_connect.php';  // ou outro nome do ficheiro da ligação
+require_once __DIR__ . '/mysqli_connect.php';
 
-// Exibir erro se ligação falhar
-if ($pdo === null) {
-    die("Erro de ligação à base de dados: " . ($db_error ?? 'Desconhecido'));
+$db_error = '';
+$motas = [];
+
+// Verificar ligação
+if ($mysqli->connect_error) {
+    $db_error = "Erro de ligação: " . $mysqli->connect_error;
+} else {
+    // Adicionar Mota
+    if (isset($_POST['adicionar'])) {
+        $marca = $_POST['marca'];
+        $modelo = $_POST['modelo'];
+        $cilindrada = $_POST['cilindrada'];
+        $preco = $_POST['preco'];
+        $ano = $_POST['ano'];
+        $tipo = $_POST['tipo'];
+
+        $stmt = $mysqli->prepare("INSERT INTO motas (marca, modelo, cilindrada, preco, ano, tipo) VALUES (?, ?, ?, ?, ?, ?)");
+        $stmt->bind_param('sssdis', $marca, $modelo, $cilindrada, $preco, $ano, $tipo);
+
+        if (!$stmt->execute()) {
+            $db_error = "Erro ao adicionar mota: " . $stmt->error;
+        }
+        $stmt->close();
+        header("Location: index.php");
+        exit();
+    }
+
+    // Editar Mota
+    if (isset($_POST['guardar_editar'])) {
+        $id = $_POST['id'];
+        $marca = $_POST['marca'];
+        $modelo = $_POST['modelo'];
+        $cilindrada = $_POST['cilindrada'];
+        $preco = $_POST['preco'];
+        $ano = $_POST['ano'];
+        $tipo = $_POST['tipo'];
+
+        $stmt = $mysqli->prepare("UPDATE motas SET marca=?, modelo=?, cilindrada=?, preco=?, ano=?, tipo=? WHERE id=?");
+        $stmt->bind_param('sssdssi', $marca, $modelo, $cilindrada, $preco, $ano, $tipo, $id);
+
+        if (!$stmt->execute()) {
+            $db_error = "Erro ao editar mota: " . $stmt->error;
+        }
+        $stmt->close();
+        header("Location: index.php");
+        exit();
+    }
+
+    // Apagar Mota
+    if (isset($_POST['apagar'])) {
+        $id = $_POST['id'];
+
+        $stmt = $mysqli->prepare("DELETE FROM motas WHERE id=?");
+        $stmt->bind_param('i', $id);
+
+        if (!$stmt->execute()) {
+            $db_error = "Erro ao apagar mota: " . $stmt->error;
+        }
+        $stmt->close();
+        header("Location: index.php");
+        exit();
+    }
+
+    // Listar Motas
+    $result = $mysqli->query("SELECT * FROM motas ORDER BY id ASC");
+    if ($result) {
+        while ($row = $result->fetch_assoc()) {
+            $motas[] = $row;
+        }
+        $result->free();
+    } else {
+        $db_error = "Erro ao obter motas: " . $mysqli->error;
+    }
 }
 
-// INSERIR
-if (isset($_POST['guardar'])) {
-    $marca = $_POST['marca'] ?? '';
-    $modelo = $_POST['modelo'] ?? '';
-    $cilindrada = $_POST['cilindrada'] ?? 0;
-    $preco = $_POST['preco'] ?? 0;
-    $ano = $_POST['ano'] ?? 0;
-    $tipo = $_POST['tipo'] ?? '';
-
-    $sql = "INSERT INTO motas (marca, modelo, cilindrada, preco, ano, tipo) 
-            VALUES (:marca, :modelo, :cilindrada, :preco, :ano, :tipo)";
-    $stmt = $pdo->prepare($sql);
-    $stmt->execute([
-        ':marca' => $marca,
-        ':modelo' => $modelo,
-        ':cilindrada' => $cilindrada,
-        ':preco' => $preco,
-        ':ano' => $ano,
-        ':tipo' => $tipo,
-    ]);
-
-    header("Location: index.php");
-    exit;
-}
-
-// ALTERAR
-if (isset($_POST['alterar'])) {
-    $id = $_POST['id'] ?? 0;
-    $marca = $_POST['marca'] ?? '';
-    $modelo = $_POST['modelo'] ?? '';
-    $cilindrada = $_POST['cilindrada'] ?? 0;
-    $preco = $_POST['preco'] ?? 0;
-    $ano = $_POST['ano'] ?? 0;
-    $tipo = $_POST['tipo'] ?? '';
-
-    $sql = "UPDATE motas SET marca=:marca, modelo=:modelo, cilindrada=:cilindrada,
-            preco=:preco, ano=:ano, tipo=:tipo WHERE id=:id";
-    $stmt = $pdo->prepare($sql);
-    $stmt->execute([
-        ':marca' => $marca,
-        ':modelo' => $modelo,
-        ':cilindrada' => $cilindrada,
-        ':preco' => $preco,
-        ':ano' => $ano,
-        ':tipo' => $tipo,
-        ':id' => $id,
-    ]);
-
-    header("Location: index.php");
-    exit;
-}
-
-// APAGAR
-if (isset($_POST['apagar'])) {
-    $id = $_POST['id'] ?? 0;
-
-    $sql = "DELETE FROM motas WHERE id=:id";
-    $stmt = $pdo->prepare($sql);
-    $stmt->execute([':id' => $id]);
-
-    header("Location: index.php");
-    exit;
-}
-
-// Mostrar dados
-$sql = "SELECT * FROM motas";
-$stmt = $pdo->query($sql);
-$motas = $stmt->fetchAll(PDO::FETCH_ASSOC);
+$mysqli->close();
 ?>
