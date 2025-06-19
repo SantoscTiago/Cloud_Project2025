@@ -18,12 +18,12 @@
         $modelo = $_POST['modelo'];
         $cilindrada = $_POST['cilindrada'];
         $preco = $_POST['preco'];
-        $armaanozenamento = $_POST['ano'];
+        $ano = $_POST['ano']; // Corrigido
         $tipo = $_POST['tipo'];
 
         try {
             $sql = "INSERT INTO motas (marca, modelo, cilindrada, preco, ano, tipo) 
-                    VALUES (:marca, :modelo,:cilindrada :preco, :ano, :tipo)";
+                    VALUES (:marca, :modelo, :cilindrada, :preco, :ano, :tipo)";
             $stmt = $pdo->prepare($sql);
             $stmt->execute([
                 ':marca' => $marca,
@@ -40,7 +40,7 @@
         }
     }
     elseif (isset($_POST['adicionar'])) {
-        $db_error = $db_error ?: 'Ligação à base de dados indisponível';
+        $db_error = $db_error ?? 'Ligacao a base de dados indisponivel';
     }
 
     // APAGAR
@@ -57,7 +57,7 @@
         }
     }
     elseif (isset($_POST['apagar'])) {
-        $db_error = $db_error ?: 'Ligação à base de dados indisponível';
+        $db_error = $db_error ?? 'Ligacao a base de dados indisponivel';
     }
 
     // EDITAR
@@ -96,6 +96,6 @@
         }
     }
     elseif (isset($_POST['guardar_editar'])) {
-        $db_error = $db_error ?: 'Ligação à base de dados indisponível';
+        $db_error = $db_error ?? 'Ligacao a base de dados indisponivel';
     }
 ?>
