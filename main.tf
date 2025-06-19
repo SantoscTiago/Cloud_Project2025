@@ -33,7 +33,7 @@ resource "azurerm_resource_group" "main" {
 }
 
 resource "azurerm_virtual_network" "vnet" {
-  name                = "vnet-telemoveis"
+  name                = "vnet-motas"
   address_space       = ["10.0.0.0/16"]
   location            = var.location
   resource_group_name = azurerm_resource_group.main.name
@@ -162,7 +162,7 @@ resource "azurerm_linux_virtual_machine" "mysql_vm" {
   resource_group_name = azurerm_resource_group.main.name
   size                = "Standard_B1s"
   admin_username      = "azureuser"
-  admin_password      = "Projecto321"
+  admin_password      = "Xpto123456"
   disable_password_authentication = false
   network_interface_ids = [azurerm_network_interface.nic_mysql.id]
 
