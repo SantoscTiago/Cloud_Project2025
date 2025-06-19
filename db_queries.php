@@ -24,7 +24,89 @@ function listar_motas(): array {
         return [];
     }
 }
+function obter_mota_por_id($id) {
+    global $pdo;
+    if ($pdo === null) return null;
 
+    try {
+        $sql = "SELECT * FROM motas WHERE id = :id";
+        $stmt = $pdo->prepare($sql);
+        $stmt->execute([':id' => $id]);
+        return $stmt->fetch(PDO::FETCH_ASSOC);
+    } catch (PDOException $e) {
+        return null;
+    }
+}
+function atualizar_mota($dados) {
+    global $pdo;
+    if ($pdo === null) return;
+
+    try {
+        $sql = "UPDATE motas SET 
+                    marca = :marca,
+                    modelo = :modelo,
+                    cilindrada = :cilindrada,
+                    preco = :preco,
+                    ano = :ano,
+                    tipo = :tipo
+                WHERE id = :id";
+        $stmt = $pdo->prepare($sql);
+        $stmt->execute([
+            ':marca' => $dados['marca'],
+            ':modelo' => $dados['modelo'],
+            ':cilindrada' => $dados['cilindrada'],
+            ':preco' => $dados['preco'],
+            ':ano' => $dados['ano'],
+            ':tipo' => $dados['tipo'],
+            ':id' => $dados['id']
+        ]);
+        header("Location: index.php");
+        exit;
+    } catch (PDOException $e) {
+        echo "Erro ao editar: " . $e->getMessage();
+    }
+}
+function adicionar_mota($dados) {
+    global $pdo;
+    if ($pdo === null) return;
+
+    try {
+        $sql = "INSERT INTO motas (marca, modelo, cilindrada, preco, ano, tipo) 
+                VALUES (:marca, :modelo, :cilindrada, :preco, :ano, :tipo)";
+        $stmt = $pdo->prepare($sql);
+        $stmt->execute([
+            ':marca' => $dados['marca'],
+            ':modelo' => $dados['modelo'],
+            ':cilindrada' => $dados['cilindrada'],
+            ':preco' => $dados['preco'],
+            ':ano' => $dados['ano'],
+            ':tipo' => $dados['tipo']
+        ]);
+        header("Location: index.php");
+        exit;
+    } catch (PDOException $e) {
+        echo "Erro ao adicionar: " . $e->getMessage();
+    }
+}
+
+function apagar_mota($id) {
+    global $pdo;
+    if ($pdo === null) return;
+
+    try {
+        $sql = "DELETE FROM motas WHERE id = :id";
+        $stmt = $pdo->prepare($sql);
+        $stmt->execute([':id' => $id]);
+        header("Location: index.php");
+        exit;
+    } catch (PDOException $e) {
+        echo "Erro ao apagar: " . $e->getMessage();
+    }
+}
+
+
+
+//funçoes antigas
 // ADICIONAR
 if (isset($_POST['adicionar']) && $pdo !== null) {
     $marca = $_POST['marca'];
