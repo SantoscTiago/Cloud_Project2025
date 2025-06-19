@@ -1,7 +1,7 @@
 <?php
 $db_error = null;
-$host = '10.0.2.4';
-$charset='utf8mb4';
+$host = '10.0.2.4';  // IP privado da VM MySQL
+$charset = 'utf8mb4';
 $dsn = "mysql:host=$host;dbname=motas_bd;charset=$charset";
 
 try {
